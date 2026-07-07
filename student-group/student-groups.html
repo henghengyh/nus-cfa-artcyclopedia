@@ -1,0 +1,399 @@
+<div class="directory-container">
+
+  <!-- MAIN LAYOUT WRAPPER -->
+  <div class="directory-layout">
+    
+    <!-- 2. FILTER SIDEBAR -->
+    <aside class="filter-sidebar">
+      <h3>Filter by Category</h3>
+      <div class="filter-group" id="catFilterGroup">
+        <!-- Populated automatically from groupData's "cat" field, no need to edit manually -->
+      </div>
+
+      <h3>Filter by Organisation</h3>
+      <div class="filter-group" id="orgFilterGroup">
+        <!-- Populated automatically from groupData's "org" field, no need to edit manually -->
+      </div>
+
+      <!-- 4. FEATURED RESOURCES -->
+      <div class="featured-resources">
+        <h3>Featured Resources</h3>
+        <a href="#YOUR_PDF_LINK_1" class="resource-link" target="_blank">📄 PDF Guide: Finding Groups on NUSync</a>
+        <a href="#YOUR_PDF_LINK_2" class="resource-link" target="_blank">📋 Full Compiled List (PDF)</a>
+      </div>
+    </aside>
+
+    <!-- 3. RESULTS LIST -->
+    <main class="results-area">
+      <!-- Live Local Text Search -->
+      <input type="text" id="localSearch" placeholder="Type to filter groups instantly...">
+      
+      <div id="groupsGrid" class="groups-grid">
+        <!-- Javascript dynamic rendering will populate this -->
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- ==========================================
+     STYLING (CSS) - Works natively in Hostinger 
+     ========================================== -->
+<style>
+  :root {
+    --primary-color: #003d7c; /* Campus blue style, tweak if needed */
+    --text-dark: #333333;
+    --bg-light: #f8f9fa;
+    --border-color: #e2e8f0;
+  }
+  
+  .directory-container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-dark);
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .directory-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .directory-header h1 { color: var(--primary-color); margin-bottom: 8px; }
+  .google-search-wrapper { max-width: 500px; margin: 20px auto 0 auto; }
+
+  /* Grid layout for Sidebar + Main content */
+  .directory-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+  }
+
+  @media (max-width: 768px) {
+    .directory-layout { grid-template-columns: 1fr; }
+  }
+
+  /* Sidebar styling */
+  .filter-sidebar {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 8px;
+    height: fit-content;
+  }
+  .filter-sidebar h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+  .filter-group label { display: block; margin: 12px 0; cursor: pointer; }
+  .filter-group:empty::after { content: "No organisations loaded yet."; font-size: 0.8rem; color: #999; }
+
+  .featured-resources { margin-top: 30px; }
+  .resource-link { display: block; margin: 10px 0; color: var(--primary-color); text-decoration: none; font-size: 0.9rem; }
+  .resource-link:hover { text-decoration: underline; }
+
+  /* Results area styling */
+  #localSearch {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+  }
+
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  /* Group Card Design */
+  .group-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+  .group-card h4 { margin: 0 0 4px 0; color: var(--primary-color); }
+  .org-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #777;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  .tag-label {
+    display: inline-block;
+    background: #e2e8f0;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .group-card p { font-size: 0.9rem; line-height: 1.4; color: #555; margin-bottom: 15px; }
+  .card-btn {
+    display: inline-block;
+    text-align: center;
+    background: var(--primary-color);
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-top: auto;
+  }
+
+  .directory-footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.85rem;
+    color: #777;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+  }
+  
+  /* Fixes Google Search element border issues inside Hostinger */
+  .gsc-control-cse { padding: 0 !important; background: transparent !important; border: none !important; }
+</style>
+
+<!-- ==========================================
+     LOGIC (JavaScript) - Controls Data & Filter
+     ========================================== -->
+<script>
+  // STEP 1: Add your data here. Just copy/paste rows to expand the list.
+  const groupData = [
+    { name: "NUS Amplified", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35489&tab=about" },
+    { name: "NUS Angklung Ensemble", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35490&tab=about" },
+    { name: "NUS Chinese Orchestra", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35512&tab=about" },
+    { name: "NUS Dikir Barat", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35699&tab=about" },
+    { name: "NUS Electronic Music Lab", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35535&tab=about" },
+    { name: "NUS Fingerstyle Guitar", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35543&tab=about" },
+    { name: "NUS Guitar Ensemble", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35555&tab=about" },
+    { name: "NUS Harmonica", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35558&tab=about" },
+    { name: "NUS Indian Instrumental Ensemble", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35567&tab=about" },
+    { name: "NUS Jazz Band", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35571&tab=about" },
+    { name: "NUS Piano Ensemble", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35603&tab=about" },
+    { name: "NUS Resonance", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35611&tab=about" },
+    { name: "NUS Symphony Orchestra", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35637&tab=about" },
+    { name: "NUS Voices", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35648&tab=about" },
+    { name: "NUS Wind Symphony", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35653&tab=about" },
+    { name: "The NUSChoir", cat: "Music", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35687&tab=about" },
+    { name: "BreakiNUS", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35455&tab=about" },
+    { name: "NUS Ballroom", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/student_community?a=1&club_id=35499" },
+    { name: "NUS Chinese Dance", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/student_community?a=1&club_id=35509" },
+    { name: "NUS d'Hoppers", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/dhoppers/web_officers" },
+    { name: "NUS Dance Blast!", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35526&tab=about" },
+    { name: "NUS Dance Ensemble", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35527&tab=about" },
+    { name: "NUS Dance Synergy", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35528&tab=about" },
+    { name: "NUS Funkstyles", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35548&tab=about" },
+    { name: "NUS Ilsa Tari", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35564&tab=about" },
+    { name: "NUS Indian Dance", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35566&tab=about" },
+    { name: "NUS Jazzttitude", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35572&tab=about" },
+    { name: "NUS Lion Dance", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35580&tab=about" },
+    { name: "Viva LatiNUS", cat: "Dance", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35494&tab=about" },
+    { name: "NUS Chinese Drama", cat: "Theatre", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/student_community?a=1&club_id=35511" },
+    { name: "NUS STAGE", cat: "Theatre", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35622&tab=about" },
+    { name: "NUS Arts Production Crew", cat: "Film & Production", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/student_community?a=1&club_id=35494" },
+    { name: "nuSTUDIOS Film Productions", cat: "Film & Production", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35657&tab=about" },
+    { name: "Third space", cat: "Other", org: "NUS Centre For the Arts", desc: "", link: "https://nusync.nus.edu.sg/feeds?type=club&type_id=35494&tab=about" },
+    { name: "Anova (Street Dance)", cat: "Dance", org: "Acacia College", desc: "", link: "" },
+    { name: "Babushkraft", cat: "Craft", org: "Acacia College", desc: "", link: "https://www.instagram.com/acacia_babushkraft/" },
+    { name: "Aftertones", cat: "Music", org: "Acacia College", desc: "", link: "https://www.instagram.com/aftertones_/" },
+    { name: "CAPT Clubs & Societies", cat: "General", org: "College of Alice & Peter Tan (CAPT)", desc: "", link: "https://www.instagram.com/capt.clubsocs/" },
+    { name: "CAPTure", cat: "Photography", org: "College of Alice & Peter Tan (CAPT)", desc: "", link: "https://www.instagram.com/capture.capt/" },
+    { name: "CAPTinSYNC", cat: "Music", org: "College of Alice & Peter Tan (CAPT)", desc: "", link: "https://www.instagram.com/captinsync/" },
+    { name: "CAPT Tunes", cat: "Music", org: "College of Alice & Peter Tan (CAPT)", desc: "", link: "https://www.instagram.com/capt_tunes/" },
+    { name: "HanDIYcraft", cat: "Craft", org: "College of Alice & Peter Tan (CAPT)", desc: "", link: "" },
+    { name: "Guitarpella", cat: "Music", org: "College of Alice & Peter Tan (CAPT)", desc: "", link: "https://www.instagram.com/guitarpella.capt/" },
+    { name: "Chapter", cat: "Literary", org: "College of Alice & Peter Tan (CAPT)", desc: "", link: "" },
+    { name: "CAPTivate", cat: "Dance", org: "College of Alice & Peter Tan (CAPT)", desc: "", link: "https://www.instagram.com/captivate.capt/" },
+    { name: "Band", cat: "Music", org: "PGPR", desc: "", link: "" },
+    { name: "Craft and culture", cat: "Craft", org: "PGPR", desc: "", link: "" },
+    { name: "tArt", cat: "Visual Arts", org: "Tembusu College", desc: "", link: "https://www.instagram.com/tartbusu" },
+    { name: "tCrews", cat: "Dance", org: "Tembusu College", desc: "", link: "https://www.instagram.com/tcrews__" },
+    { name: "SlaTe", cat: "Theatre", org: "Tembusu College", desc: "", link: "https://www.instagram.com/slate_tembusu" },
+    { name: "Tembolly", cat: "Music", org: "Tembusu College", desc: "", link: "https://www.instagram.com/tembolly/" },
+    { name: "Tempo", cat: "Music", org: "Tembusu College", desc: "", link: "https://www.instagram.com/tembusutempo" },
+    { name: "Rolling Tones", cat: "Music", org: "Tembusu College", desc: "", link: "https://www.instagram.com/tembusurollingtones" },
+    { name: "Yarn & Doodles", cat: "Craft", org: "Tembusu College", desc: "", link: "https://www.instagram.com/tembu_ynd" },
+    { name: "Temasek Hall Dance Club (THDC)", cat: "Dance", org: "Temasek Hall", desc: "", link: "https://www.instagram.com/temasekhalldance/" },
+    { name: "THRESHOLD", cat: "Theatre", org: "Temasek Hall", desc: "", link: "https://www.instagram.com/th.reshold/" },
+    { name: "THEATRETTE", cat: "Theatre", org: "Temasek Hall", desc: "", link: "https://www.instagram.com/temasektheatrette/" },
+    { name: "Temasek Hall's Dance Production (THDP)", cat: "Dance", org: "Temasek Hall", desc: "", link: "https://www.instagram.com/temasekhall.dp/" },
+    { name: "VOX", cat: "Music", org: "Temasek Hall", desc: "", link: "https://www.instagram.com/temasekvox/" },
+    { name: "KEVII Band", cat: "Music", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/ke7_band/" },
+    { name: "KEVII Choir", cat: "Music", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/ke7choir/" },
+    { name: "KE7 Dance", cat: "Dance", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/keviidance/" },
+    { name: "acaKE", cat: "Music", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/ke7acapella/" },
+    { name: "KE Ensemble", cat: "Music", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/ke_ensemblevii/" },
+    { name: "King Edward VII Hall Chinese Drama Club", cat: "Theatre", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/keviichinesedrama/" },
+    { name: "KE VII HallPlay", cat: "Theatre", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/kehallplay/" },
+    { name: "Raffles Hall Culture Committee", cat: "General", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rh_culturecomm/" },
+    { name: "RH Dance", cat: "Dance", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rhdvnce/" },
+    { name: "RHebels", cat: "Dance", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rh.ebels/" },
+    { name: "Raffles Hall Unplugged", cat: "Music", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rh.unplugged/" },
+    { name: "RH Voices", cat: "Music", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/raffleshallvoices/" },
+    { name: "RHythm", cat: "Music", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rhythm_aca/" },
+    { name: "RHMP", cat: "Theatre", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rhmusicalproduction/" },
+    { name: "RHockerfellas", cat: "Music", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rhockerfellas/" },
+    { name: "Raffles Hall Musical Production", cat: "Theatre", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rhmusicalproduction/" },
+    { name: "Culture Management Committee", cat: "General", org: "Eusoff Hall", desc: "", link: "https://www.instagram.com/eusoff_cmc/" },
+    { name: "Eusoff Hall Drama-Dance Production (EHDP)", cat: "Theatre", org: "Eusoff Hall", desc: "", link: "https://www.instagram.com/eusoff_dp/" },
+    { name: "Chorapella", cat: "Music", org: "Eusoff Hall", desc: "", link: "https://www.instagram.com/eh.chorapella/" },
+    { name: "Eusoff Band", cat: "Music", org: "Eusoff Hall", desc: "", link: "https://www.instagram.com/eusoff_band/" },
+    { name: "Eusoff Drama", cat: "Theatre", org: "Eusoff Hall", desc: "", link: "https://www.instagram.com/eh_drama/" },
+    { name: "Eusoff Dance Crew", cat: "Dance", org: "Eusoff Hall", desc: "", link: "https://www.instagram.com/eh_dancecrew/" },
+    { name: "Kent Ridge Hall Video Production Team", cat: "Film & Production", org: "Kent Ridge Hall", desc: "", link: "https://www.youtube.com/channel/UCrzpHtVQEmnttZJEN39sO3A" },
+    { name: "KRaphics", cat: "Visual Arts", org: "Kent Ridge Hall", desc: "", link: "" },
+    { name: "Photo Committee", cat: "Photography", org: "Kent Ridge Hall", desc: "", link: "" },
+    { name: "Kent Ridge Hall Dance", cat: "Dance", org: "Kent Ridge Hall", desc: "", link: "https://www.instagram.com/krdanceofficial/" },
+    { name: "KR Rockers", cat: "Music", org: "Kent Ridge Hall", desc: "", link: "https://www.instagram.com/krrockers/" },
+    { name: "KR Inspire", cat: "Uncertain", org: "Kent Ridge Hall", desc: "", link: "https://www.instagram.com/kentridgeinspire/" },
+    { name: "KRemix", cat: "Music", org: "Kent Ridge Hall", desc: "", link: "https://www.instagram.com/kremix_official/" },
+    { name: "Kent Ridge Acappella", cat: "Music", org: "Kent Ridge Hall", desc: "", link: "https://www.instagram.com/akrappella/" },
+    { name: "KR Choir", cat: "Music", org: "Kent Ridge Hall", desc: "", link: "https://www.instagram.com/officialkroir/" },
+    { name: "Sheares Hall Cultural Management Board", cat: "General", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/shearescmb/" },
+    { name: "Chorale", cat: "Music", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/sheareschorale/" },
+    { name: "DanSHers", cat: "Dance", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/theofficialdanshers/" },
+    { name: "EnSHemble", cat: "Music", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/enshemble/" },
+    { name: "Geyao", cat: "Music", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/shearesyao/" },
+    { name: "SHaccapella", cat: "Music", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/shearesacappella/" },
+    { name: "Sheares Band", cat: "Music", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/shearesband/" },
+    { name: "Sheares Beats", cat: "Music", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/beatsbyshearesbeats/" },
+    { name: "Sheares Production", cat: "Film & Production", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/shearesproduction/" },
+    { name: "Sheares Media", cat: "Film & Production", org: "Sheares Hall", desc: "", link: "https://www.instagram.com/shearesmedia/" },
+    { name: "NUS Origami Club", cat: "Craft", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nusorigami/" },
+    { name: "NUS Comedy Club", cat: "Theatre", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nuscomedyclub/" },
+    { name: "NUS Arttero", cat: "Visual Arts", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nus.arttero/" },
+    { name: "NUS Makeup and Design", cat: "Visual Arts", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nus.mad/" },
+    { name: "NUS Literacy Society", cat: "Literary", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nusliterarysociety/" },
+    { name: "NUS Comics and Animation Society", cat: "Visual Arts", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nuscomicsoc/" },
+    { name: "The Photographic Society of NUS", cat: "Photography", org: "NUS Interest Groups", desc: "", link: "https://nusps.org.sg/" },
+    { name: "NUS Crocheting Club", cat: "Craft", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nuscrochetingclub/" },
+    { name: "NUS Makers' Alley", cat: "Craft", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nusmakersalley/" },
+    { name: "n:ow arts", cat: "Visual Arts", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/now.arts/" },
+    { name: "NUS DJ Collective (SynQ)", cat: "Music", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nussynq/" },
+    { name: "STUDYO", cat: "Visual Arts", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/studyo.sg/" },
+    { name: "NUSSU Videography & Photography Committee", cat: "Film & Production", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nussuvpc/" },
+    { name: "Radio Pulze", cat: "Music", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/radiopulze/" },
+    { name: "NUANSA Cultural Production", cat: "Cultural", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nuansacp/" },
+    { name: "NUS Musical Theatre Interest Group (NUSical)", cat: "Theatre", org: "NUS Interest Groups", desc: "", link: "https://www.instagram.com/nusmusicaltheatre/" },
+    { name: "NUS French Hexagon Club", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/nusfrenchhexagonclub/" },
+    { name: "NUS Southeast Asian Studies Society", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/nusseasoc/" },
+    { name: "NUS Japanese Studies Society", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/nusjss/" },
+    { name: "JSS Book Club", cat: "Literary", org: "NUS Japanese Studies Society", desc: "", link: "https://www.instagram.com/nusjapaneselit/" },
+    { name: "Nihon Buyo", cat: "Dance", org: "NUS Japanese Studies Society", desc: "", link: "" },
+    { name: "Japanese Music Club", cat: "Music", org: "NUS Japanese Studies Society", desc: "", link: "" },
+    { name: "KotoKottoN", cat: "Music", org: "NUS Japanese Studies Society", desc: "", link: "" },
+    { name: "Odoro!!", cat: "Dance", org: "NUS Japanese Studies Society", desc: "", link: "" },
+    { name: "NUS Sado Club", cat: "Cultural", org: "NUS Japanese Studies Society", desc: "", link: "" },
+    { name: "NUS Chinese Society", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/nuschinesesociety/" },
+    { name: "Tamil Language Society", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/nustls/" },
+    { name: "NUS Malay Language Society (PBMUKS)", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/pbmuks/" },
+    { name: "NUS Hindu Club", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/nushsoc/" },
+    { name: "NUS Indian Cultural Society", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/nus_ics/" },
+    { name: "NAACH", cat: "Dance", org: "NUS Indian Cultural Society", desc: "", link: "https://www.instagram.com/nusnaach/" },
+    { name: "NUS Korean Cultural Interest Group", cat: "Cultural", org: "NUS Cultural Interest Groups", desc: "", link: "https://www.instagram.com/nus_kcig/" },
+    { name: "KCIG Cultural Session (KCS)", cat: "Cultural", org: "NUS Korean Cultural Interest Group", desc: "", link: "" },
+    { name: "KCIG Dance Team (KDT)", cat: "Dance", org: "NUS Korean Cultural Interest Group", desc: "", link: "" },
+    { name: "KCIG Vocal Team (KVT)", cat: "Music", org: "NUS Korean Cultural Interest Group", desc: "", link: "" }
+  ];
+
+  const grid = document.getElementById('groupsGrid');
+  const searchInput = document.getElementById('localSearch');
+  const catFilterGroup = document.getElementById('catFilterGroup');
+  const orgFilterGroup = document.getElementById('orgFilterGroup');
+
+  // Build the "Filter by Category" checkboxes automatically from the data,
+  // so new categories (Music, Dance, Theatre, etc.) show up with zero manual editing.
+  function populateCatFilters(data) {
+    const uniqueCats = [...new Set(data.map(g => g.cat).filter(Boolean))].sort();
+
+    catFilterGroup.innerHTML = uniqueCats.map(cat => `
+      <label><input type="checkbox" class="category-filter" value="${cat}"> ${cat}</label>
+    `).join('');
+
+    // Re-attach listeners since these checkboxes are newly created each time
+    document.querySelectorAll('.category-filter').forEach(cb => {
+      cb.addEventListener('change', applyFilters);
+    });
+  }
+
+  // Build the "Filter by Organisation" checkboxes automatically from the data,
+  // so you never have to hand-edit the sidebar when orgs change.
+  function populateOrgFilters(data) {
+    const uniqueOrgs = [...new Set(data.map(g => g.org).filter(Boolean))].sort();
+
+    orgFilterGroup.innerHTML = uniqueOrgs.map(org => `
+      <label><input type="checkbox" class="org-filter" value="${org}"> ${org}</label>
+    `).join('');
+
+    // Re-attach listeners since these checkboxes are newly created each time
+    document.querySelectorAll('.org-filter').forEach(cb => {
+      cb.addEventListener('change', applyFilters);
+    });
+  }
+
+  // Function to render the cards dynamically
+  function renderGroups(filteredData) {
+    grid.innerHTML = '';
+    if (filteredData.length === 0) {
+      grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#777;">No groups found matching those criteria.</p>';
+      return;
+    }
+
+    filteredData.forEach(group => {
+      const card = document.createElement('div');
+      card.className = 'group-card';
+      card.innerHTML = `
+        <div>
+          <span class="tag-label">${group.cat}</span>
+          <h4>${group.name}</h4>
+          ${group.org ? `<span class="org-label">${group.org}</span>` : ''}
+          <p>${group.desc}</p>
+        </div>
+        <a href="${group.link}" class="card-btn" target="_blank">View on NUSync</a>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Master function filters data based on search text + category + organisation
+  function applyFilters() {
+    const searchText = searchInput.value.toLowerCase();
+
+    const checkedCats = Array.from(document.querySelectorAll('.category-filter'))
+                             .filter(cb => cb.checked)
+                             .map(cb => cb.value);
+
+    const checkedOrgs = Array.from(document.querySelectorAll('.org-filter'))
+                             .filter(cb => cb.checked)
+                             .map(cb => cb.value);
+
+    const filtered = groupData.filter(group => {
+      const matchesSearch = group.name.toLowerCase().includes(searchText) ||
+                             group.desc.toLowerCase().includes(searchText) ||
+                             (group.org || '').toLowerCase().includes(searchText);
+
+      const matchesCategory = checkedCats.length === 0 || checkedCats.includes(group.cat);
+      const matchesOrg = checkedOrgs.length === 0 || checkedOrgs.includes(group.org);
+
+      return matchesSearch && matchesCategory && matchesOrg;
+    });
+
+    renderGroups(filtered);
+  }
+
+  // Hook up event listeners so everything updates live
+  searchInput.addEventListener('input', applyFilters);
+  // (category & org checkbox listeners are attached inside their populate functions,
+  // since those checkboxes are created dynamically)
+
+  // Initial setup on page load
+  populateCatFilters(groupData);
+  populateOrgFilters(groupData);
+  renderGroups(groupData);
+</script>
