@@ -10,6 +10,8 @@
         <!-- Populated automatically from groupData's "cat" field, no need to edit manually -->
       </div>
 
+      <div style="height: 30px;"></div>
+
       <h3>Filter by Organisation</h3>
       <div class="filter-group" id="orgFilterGroup">
         <!-- Populated automatically from groupData's "org" field, no need to edit manually -->
@@ -126,25 +128,36 @@
   }
   .tag-label {
     display: inline-block;
-    background: #e2e8f0;
     font-size: 0.75rem;
-    padding: 2px 8px;
-    border-radius: 12px;
+    padding: 3px 10px;
+    border-radius: 4px;
     margin-bottom: 12px;
-    font-weight: 600;
+    font-weight: 500; /* Clean, not bold */
+    color: #2d3748; /* Dark gray text for high contrast */
   }
   .group-card p { font-size: 0.9rem; line-height: 1.4; color: #555; margin-bottom: 15px; }
   .card-btn {
     display: inline-block;
     text-align: center;
-    background: var(--primary-color);
-    color: #fff;
+    color: #fff !important;
     text-decoration: none;
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 10px 12px;
+    border-radius: 6px;
     font-size: 0.85rem;
+    font-weight: 500;
     margin-top: auto;
+    transition: background 0.2s ease, transform 0.1s ease;
   }
+  .card-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+  }
+  /* Dynamic Button Brand Colors */
+  .btn-nusync { background: #ef7c00; }     /* NUS Orange */
+  .btn-instagram { background: #e1306c; }  /* Instagram Pink/Red */
+  .btn-youtube { background: #ff0000; }    /* YouTube Red */
+  .btn-website { background: #319795; }    /* Clean Teal for other websites */
+  .btn-disabled { background: #cbd5e1; color: #64748b !important; cursor: not-allowed; }
 
   .directory-footer {
     text-align: center;
@@ -230,7 +243,7 @@
     { name: "acaKE", cat: "Music", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/ke7acapella/" },
     { name: "KE Ensemble", cat: "Music", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/ke_ensemblevii/" },
     { name: "King Edward VII Hall Chinese Drama Club", cat: "Theatre", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/keviichinesedrama/" },
-    { name: "KE VII HallPlay", cat: "Theatre", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/kehallplay/" },
+    { name: "KEVII Hallplay", cat: "Theatre", org: "King Edward VII (KE7) Hall", desc: "", link: "https://www.instagram.com/kehallplay/" },
     { name: "Raffles Hall Culture Committee", cat: "General", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rh_culturecomm/" },
     { name: "RH Dance", cat: "Dance", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rhdvnce/" },
     { name: "RHebels", cat: "Dance", org: "Raffles Hall", desc: "", link: "https://www.instagram.com/rh.ebels/" },
@@ -337,25 +350,74 @@
     });
   }
 
-  // Function to render the cards dynamically
+  // Function to render the cards dynamically with adaptive colors
   function renderGroups(filteredData) {
     grid.innerHTML = '';
-    if (filteredData.length === 0) {
+    if (!filteredData || filteredData.length === 0) {
       grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#777;">No groups found matching those criteria.</p>';
       return;
     }
 
+    // Map categories to soft, clean, non-pastel colors
+    const categoryColors = {
+      "Music": "#cbd5e1",            // Soft slate gray
+      "Dance": "#fee2e2",            // Muted brick/rose tint
+      "Theatre": "#fef3c7",          // Muted warm amber
+      "Film & Production": "#e0f2fe",// Muted ice blue
+      "Visual Arts": "#e2e8f0",      // Light neutral gray
+      "Photography": "#dcfce7",      // Muted sage green
+      "Craft": "#f3e8ff",            // Muted lilac
+      "Cultural": "#ffedd5",         // Muted soft orange
+      "Literary": "#fae8ff",         // Muted orchid
+      "General": "#f1f5f9"           // Soft fallback gray
+    };
+
     filteredData.forEach(group => {
+      const groupName = group.name || "Unnamed Group";
+      const groupCat = group.cat || "General";
+      const groupOrg = group.org || "";
+      const groupDesc = group.desc || "";
+      const groupLink = group.link || "";
+
+      // 1. Determine button text and dynamic brand color class
+      let btnText = "View on NUSync";
+      let btnClass = "btn-nusync"; 
+      const linkStr = groupLink.toLowerCase().trim();
+
+      if (linkStr.includes("instagram.com")) {
+        btnText = "View on Instagram";
+        btnClass = "btn-instagram";
+      } else if (linkStr.includes("youtube.com") || linkStr.includes("youtu.be")) {
+        btnText = "Watch on YouTube";
+        btnClass = "btn-youtube";
+      } else if (linkStr === "") {
+        btnText = "No Link Available";
+        btnClass = "btn-disabled";
+      } else if (!linkStr.includes("nusync.nus.edu.sg")) {
+        btnText = "Visit Website"; 
+        btnClass = "btn-website";
+      }
+
+      // 2. Get dynamic category tag background color
+      const tagBgColor = categoryColors[groupCat] || categoryColors["General"];
+
+      // 3. Build button element
+      const hasLink = linkStr !== "";
+      const buttonHtml = hasLink 
+        ? `<a href="${groupLink}" class="card-btn ${btnClass}" target="_blank">${btnText}</a>`
+        : `<span class="card-btn ${btnClass}">${btnText}</span>`;
+
+      // 4. Create and append the card
       const card = document.createElement('div');
       card.className = 'group-card';
       card.innerHTML = `
         <div>
-          <span class="tag-label">${group.cat}</span>
-          <h4>${group.name}</h4>
-          ${group.org ? `<span class="org-label">${group.org}</span>` : ''}
-          <p>${group.desc}</p>
+          <span class="tag-label" style="background-color: ${tagBgColor};">${groupCat}</span>
+          <h4>${groupName}</h4>
+          ${groupOrg ? `<span class="org-label">${groupOrg}</span>` : ''}
+          <p>${groupDesc}</p>
         </div>
-        <a href="${group.link}" class="card-btn" target="_blank">View on NUSync</a>
+        ${buttonHtml}
       `;
       grid.appendChild(card);
     });
