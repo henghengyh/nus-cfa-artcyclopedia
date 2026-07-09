@@ -62,27 +62,41 @@ Please review the following:
 - Mobile responsiveness
 - Ease of use
 
-## Landing Page
+## Header
 
 - Hero section
 - Search bar
+- Logo
+
+## Landing Page
+
 - Quick access buttons
-- Navigation
+- Arrangement & Navigation of other tabs
+- Colour scheme
+
+## Footer
+
+- Sufficient relevant info displayed
+- Arrangement of information
 
 ## Venue Guide
 
 - Page layout
+- Photos for display
 - Venue categorisation
 - Google Maps integration
 - Venue information layout
+- User Guide are correct
+- Any additional information wished to be provided to user
 
 ## Finance & Funding
 
+- Description if any
+- Position of Infographic & Any supporting description required
 - Resource cards
-- Download buttons
-- Information hierarchy
+- Download buttons are correct
 
-## Publicity Resources
+## Publicity Resources (TBD)
 
 - Organisation of resources
 - External links
@@ -91,16 +105,15 @@ Please review the following:
 
 - Directory layout
 - Search experience
+- Unfortunately, no photos are allowed. 
 
-## Shopping Directory
+Note: Steps to maintaining the list of the student groups will be documented in Github.
 
-- Search and filtering layout
-
-## Equipment Loan
+## Equipment Loan (TBD)
 
 - Information presentation
 
-## About Us
+## About Us (TBD)
 
 - Organisation information
 - Image carousel
@@ -115,15 +128,12 @@ Please provide all final content by **24 July** to avoid delays to the developme
 
 ### Photos Required
 
-- Homepage hero/banner image
-- CAC logo (high resolution)
-- Supporting graphics (optional)
+- 1 photo per linked page
 
 ### Content Required
 
-- Welcome message
-- Search categories
-- Quick access labels
+- Welcome message (if any)
+- Text description for each linked page
 
 ---
 
@@ -131,14 +141,11 @@ Please provide all final content by **24 July** to avoid delays to the developme
 
 ### Photos Required
 
-- *(Optional)* Photos of each venue
+NA
 
 ### Content Required
 
-- Venue descriptions
-- Directions
-- Available facilities
-- Booking links
+NA
 
 ---
 
@@ -146,12 +153,17 @@ Please provide all final content by **24 July** to avoid delays to the developme
 
 ### Photos Required
 
-- Infographics (if applicable)
+- Cover image
+- Infographics
 
 ### Files Required
 
-- Final PDF guides
-- Funding documents
+- Final PDF guides (if any)
+- Funding documents (if any)
+
+### Content required
+
+- Intro paragraph if any
 
 ---
 
@@ -170,28 +182,19 @@ Please provide all final content by **24 July** to avoid delays to the developme
 
 ### Photos Required
 
-- *(Optional)* Cover image
+- Cover image
 
 ### Content Required
 
-- List of arts groups
-- Categories
-- NUSync links
+- Updated List of arts groups (if any changes since meeting on 7 Jul)
+
+### Files Required
+
+- User Guide to find student groups on NUSync
 
 ---
 
-## 6. Shopping Directory
-
-### Content Required
-
-- Vendor list
-- Categories
-- Shop information
-- Links
-
----
-
-## 7. Equipment Loan
+## 6. Equipment Loan
 
 ### Content Required
 
@@ -202,7 +205,7 @@ Please provide all final content by **24 July** to avoid delays to the developme
 
 ---
 
-## 8. About Us
+## 7. About Us
 
 ### Photos Required
 
@@ -236,7 +239,7 @@ Please provide feedback on:
 # Notes
 
 - All external links will open in a new tab.
-- PDFs may be displayed within the website or downloaded where appropriate.
+- PDFs can only be downloaded.
 - The interactive venue map will use Google My Maps.
 
 **Action Required:** Before launch, NUS CAC will need to duplicate the Google My Maps using an official NUS CAC Google account and provide the new map link. This ensures the published map is owned by NUS CAC rather than a personal Google account.
