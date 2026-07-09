@@ -189,6 +189,7 @@ NA
 ### Content Required
 
 - Updated List of arts groups (if any changes since meeting on 7 Jul)
+- NUSync Link for third space is wrong
 
 ### Files Required
 
