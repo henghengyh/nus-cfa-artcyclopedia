@@ -193,6 +193,7 @@ NA
 ### Files Required
 
 - User Guide to find student groups on NUSync
+- Full compiled list of student groups in PDF form
 
 ---
 
