@@ -1,10 +1,10 @@
 <div class="clean-search-container">
-  <div class="search-box-wrapper">    
+  <div class="search-box-wrapper">
     <div class="input-container">
       <input 
         type="text" 
         id="directSearchInput" 
-        placeholder="Click to choose a persona, or type to search..." 
+        placeholder="Type to search..." 
         autocomplete="off"
       >
       <div id="dynamicDropdown" class="dynamic-menu"></div>
@@ -13,212 +13,110 @@
 </div>
 
 <style>
-  html, body, .clean-search-container {
-    overflow: visible !important;
-  }
-
-  .clean-search-container {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #333;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 10px;
-    padding-bottom: 500px; 
-  }
-
-  .search-box-wrapper {
-    position: relative;
-    width: 100%;
-    overflow: visible !important;
-  }
-
-  .search-label {
-    display: block;
-    font-weight: bold;
-    font-size: 1rem;
-    color: #003d7c;
-    margin-bottom: 6px;
-  }
-
-  .input-container {
-    position: relative;
-    overflow: visible !important;
-  }
-
-  #directSearchInput {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 1rem;
-    border: 2px solid #cbd5e1;
-    border-radius: 6px;
-    box-sizing: border-box;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  #directSearchInput:focus {
-    border-color: #003d7c;
-  }
-
-  .dynamic-menu {
-    display: none;
-    position: absolute;
-    top: 105%;
-    left: 0;
-    right: 0;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    z-index: 999999 !important; 
-    max-height: 280px;
-    overflow-y: auto;
-  }
-
-  .menu-section-title {
-    padding: 8px 14px;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: #64748b;
-    background: #f8fafc;
-    font-weight: bold;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  .dropdown-link-item {
-    display: block;
-    padding: 12px 14px;
-    color: #333;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    border-bottom: 1px solid #f1f5f9;
-  }
-
-  .dropdown-link-item:last-child {
-    border-bottom: none;
-  }
-
-  .dropdown-link-item:hover {
-    background: #f1f5f9;
-    color: #003d7c;
-    font-weight: 500;
-  }
-
-  .no-results, .loading-results {
-    padding: 14px;
-    color: #64748b;
-    font-size: 0.9rem;
-    text-align: center;
-  }
+  html, body, .clean-search-container { overflow: visible !important; }
+  .clean-search-container { font-family: -apple-system, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 10px; padding-bottom: 500px; }
+  .search-box-wrapper { position: relative; width: 100%; overflow: visible !important; }
+  .search-label { display: block; font-weight: bold; font-size: 1rem; color: #003d7c; margin-bottom: 6px; }
+  .input-container { position: relative; overflow: visible !important; }
+  #directSearchInput { width: 100%; padding: 12px 16px; font-size: 1rem; border: 2px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; outline: none; }
+  #directSearchInput:focus { border-color: #003d7c; }
+  .dynamic-menu { display: none; position: absolute; top: 105%; left: 0; right: 0; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); z-index: 999999 !important; max-height: 280px; overflow-y: auto; }
+  .menu-section-title { padding: 8px 14px; font-size: 0.75rem; text-transform: uppercase; color: #64748b; background: #f8fafc; font-weight: bold; border-bottom: 1px solid #e2e8f0; }
+  .dropdown-link-item { display: block; padding: 12px 14px; color: #333; font-size: 0.95rem; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+  .dropdown-link-item:hover { background: #f1f5f9; color: #003d7c; }
+  .no-results { padding: 14px; color: #64748b; text-align: center; font-size: 0.9rem; }
 </style>
 
 <script>
-  // 1. DEFAULT PERSONAS
-  const siteLinks = [
-    { label: "🪩 I'm new to NUS Arts", url: "" },
-    { label: "🎬 I want to organise a production", url: "venue" },
-    { label: "💰 I'm handling club finances", url: "funding" },
-    { label: "🎭 I'm looking for performance opportunities", url: "student-groups" }
+  // 1. Core static user personas
+  const sitePersonas = [
+    { label: "🪩 I'm new to NUS Arts", keywords: ["new", "nus", "freshman", "orientation"], url: "https://yourwebsite.com/welcome-new-students" },
+    { label: "🎬 I want to organise a production", keywords: ["production", "organise", "booking", "theatre"], url: "https://yourwebsite.com/venue-booking-guide" },
+    { label: "💰 I'm handling club finances", keywords: ["finance", "claims", "grant", "budget"], url: "https://yourwebsite.com/finance-portal" },
+    { label: "🎭 I'm looking for performance opportunities", keywords: ["performance", "audition", "talent"], url: "https://yourwebsite.com/venue" }
   ];
 
-  // 2. CONFIGURATION FOR API ARCHITECTURE
-  // Swap this with your actual API endpoint or backend gateway later
-  const API_ENDPOINT = "https://api.yourwebsite.com/search"; 
-  const TARGET_SITE = "https://yourwebsite.com"; 
+  // 2. FIXED: Permanent, non-expiring URL (Ensure your GitHub repo is set to PUBLIC)
+  const GITHUB_JSON_URL = "https://raw.githubusercontent.com/henghengyh/nus-cfa-artcyclopedia/main/search-index.json";
 
+  let scrapedDatabase = [];
   const searchInput = document.getElementById('directSearchInput');
   const dropdown = document.getElementById('dynamicDropdown');
-  let debounceTimer;
 
-  // Render elements in the UI dropdown wrapper
-  function updateDropdown(items, isSearching = false) {
+  // Pre-fetch the HTML scraped data index quietly on page load
+  async function loadSearchDatabase() {
+    try {
+      console.log("🔄 Fetching search database from GitHub...");
+      const res = await fetch(GITHUB_JSON_URL);
+      if (res.ok) {
+        scrapedDatabase = await res.json();
+        console.log("✅ Database loaded successfully! Total cached pages:", scrapedDatabase.length);
+      } else {
+        console.error("❌ Failed to load database. HTTP Status:", res.status);
+      }
+    } catch (e) { 
+      console.error("❌ Error fetching search index:", e); 
+    }
+  }
+  loadSearchDatabase();
+
+  function updateDropdown(items, titleText) {
     dropdown.innerHTML = '';
     if (items.length === 0) {
-      dropdown.innerHTML = '<div class="no-results">No matching topics found.</div>';
+      dropdown.innerHTML = '<div class="no-results">No matching keywords found on site.</div>';
       return;
     }
 
     const header = document.createElement('div');
     header.className = 'menu-section-title';
-    header.textContent = isSearching ? "Search Results" : "Select Your Profile / Need";
+    header.textContent = titleText;
     dropdown.appendChild(header);
 
     items.forEach(item => {
       const itemRow = document.createElement('div');
       itemRow.className = 'dropdown-link-item';
       itemRow.textContent = item.label;
-      
       itemRow.onclick = function() {
-        if (window.top) {
-          window.top.location.href = item.url;
-        } else {
-          window.location.href = item.url;
-        }
+        window.top ? window.top.location.href = item.url : window.location.href = item.url;
       };
-      
       dropdown.appendChild(itemRow);
     });
   }
 
-  // Live Async Fetch call targeting the endpoint dictionary
-  async function fetchSearchResults(query) {
-    dropdown.innerHTML = '<div class="loading-results">Searching resources...</div>';
-    
-    try {
-      // Constructs URL containing search query parameter and site restriction parameters
-      const response = await fetch(`${API_ENDPOINT}?q=${encodeURIComponent(query)}&site=${encodeURIComponent(TARGET_SITE)}`);
-      
-      if (!response.ok) throw new Error("Network error during API search request");
-      
-      const data = await response.json();
-      
-      // Expected API output response mapping array format: [{ title: "Result String", url: "https://..." }]
-      const mappedResults = data.map(item => ({
-        label: item.title,
-        url: item.url
-      }));
-
-      updateDropdown(mappedResults, true);
-    } catch (error) {
-      console.error("API error fallback triggered:", error);
-      
-      // Local fallback routine if API hits rate limiting or isn't built yet
-      const fallbackMatches = siteLinks.filter(item => 
-        item.label.toLowerCase().includes(query)
-      );
-      updateDropdown(fallbackMatches, true);
-    }
-  }
-
-  // Dropdown open management on click interaction
   searchInput.addEventListener('focus', () => {
-    const currentQuery = searchInput.value.trim();
-    if (!currentQuery) {
-      updateDropdown(siteLinks, false);
+    if (!searchInput.value.trim()) {
+      updateDropdown(sitePersonas, "Select Your Profile / Need");
     }
     dropdown.style.display = 'block';
   });
 
-  // Debounced execution logic handling keystrokes safely without flooding API requests
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
-    clearTimeout(debounceTimer);
-
     if (!query) {
-      updateDropdown(siteLinks, false);
+      updateDropdown(sitePersonas, "Select Your Profile / Need");
       return;
     }
 
-    debounceTimer = setTimeout(() => {
-      fetchSearchResults(query);
-    }, 300); // 300ms wait period limits server pressure
+    // A. First check if it matches a persona keyword definition
+    let matches = sitePersonas.filter(item => 
+      item.label.toLowerCase().includes(query) || item.keywords.some(k => k.includes(query))
+    );
+
+    // B. If no direct persona matches, search inside the raw HTML scraped page contents text!
+    if (matches.length === 0 && scrapedDatabase.length > 0) {
+      matches = scrapedDatabase
+        .filter(page => {
+          const contentText = page.content ? page.content.toLowerCase() : "";
+          const titleText = page.title ? page.title.toLowerCase() : "";
+          return contentText.includes(query) || titleText.includes(query);
+        })
+        .map(page => ({ label: `📄 ${page.title}`, url: page.url }));
+    }
+
+    updateDropdown(matches, "Search Results");
   });
 
-  // FIX: Fixed structural tracking to close dropdown properly when clicking outside the element
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-box-wrapper')) {
-      dropdown.style.display = 'none';
-    }
+    if (!e.target.closest('.search-box-wrapper')) dropdown.style.display = 'none';
   });
 </script>
