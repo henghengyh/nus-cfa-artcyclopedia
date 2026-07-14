@@ -1,0 +1,8 @@
+{
+  "name": "nus-cac-scraper",
+  "version": "1.0.0",
+  "description": "Custom site scraper index builder",
+  "main": "scraper.js",
+  "type": "commonjs",
+  "dependencies": {}
+}
