@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-// The links you want your search bar to crawl
+// The active NUS-CAC links you want to crawl
 const urls = [
   'https://nus-cac.com/',
   'https://nus-cac.com/venue',
@@ -11,41 +11,39 @@ const urls = [
   'https://nus-cac.com/about'
 ];
 
-// Helper function to fetch HTML content securely without external fetch dependencies
-function fetchHtml(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
-      if (res.statusCode < 200 || res.statusCode >= 300) {
-        return reject(new Error(`Status Code: ${res.statusCode}`));
-      }
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
-    }).on('error', err => reject(err));
-  });
-}
-
 async function buildIndex() {
   const searchIndex = [];
 
   for (const url of urls) {
     try {
       console.log(`Fetching site index from: ${url}`);
-      const html = await fetchHtml(url);
+      
+      // Native fetch automatically handles SSL/TLS handshakes and follows 301/302 redirects
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      });
 
-      // Extract <title> value using simple regex matching
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const html = await response.text();
+
+      // Extract the Page Title
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
       const title = titleMatch ? titleMatch[1].trim() : url;
 
-      // Extract content from <body> block and strip layout markup
+      // Extract and clean Body Text
       const bodyMatch = html.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
       let bodyText = bodyMatch ? bodyMatch[1] : html;
       
       bodyText = bodyText
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remove scripts
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')   // Remove styles
-        .replace(/<[^>]+>/g, ' ')                         // Strip tags
-        .replace(/\s+/g, ' ')                             // Clean multiple spaces
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') 
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')   
+        .replace(/<[^>]+>/g, ' ')                         
+        .replace(/\s+/g, ' ')                             
         .trim()
         .toLowerCase();
 
@@ -54,14 +52,17 @@ async function buildIndex() {
         url: url,
         content: bodyText
       });
+      
+      console.log(`✅ Successfully indexed: "${title}"`);
+
     } catch (error) {
-      console.error(`Skipping URL: ${url} due to error:`, error.message);
+      console.warn(`⚠️ Skipped URL: ${url} (Reason: ${error.message})`);
     }
   }
 
-  // Output compiled JSON static database locally
+  // Save the compiled data
   fs.writeFileSync('search-index.json', JSON.stringify(searchIndex, null, 2));
-  console.log('Successfully written index database to search-index.json!');
+  console.log(`🏁 Done! Successfully wrote ${searchIndex.length} pages to search-index.json!`);
 }
 
 buildIndex();
