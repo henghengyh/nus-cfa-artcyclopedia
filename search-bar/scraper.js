@@ -50,7 +50,7 @@ async function buildIndex() {
       let bodyText = bodyMatch ? bodyMatch[1] : html;
 
       // 🔍 DETECT & EXTRACT Trapped Content in Hostinger iFrames
-      const srcdocRegex = /srcdoc\s*=\s*"([\s\S]*?)"/gi;
+      const srcdocRegex = /srcdoc\s*=\s*["']([\s\S]*?)["']/gi;
       let match;
       let extractedEmbedContents = "";
 
