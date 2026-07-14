@@ -98,68 +98,59 @@ async function buildIndex() {
   const searchIndex = [];
 
   for (const url of urls) {
+    let title = url; // Default title
+    let bodyText = "";
+
     try {
       console.log(`Fetching site index from: ${url}`);
       
       const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0'
         }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (response.ok) {
+        const html = await response.text();
+        
+        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        if (titleMatch) title = titleMatch[1].trim();
+
+        const bodyMatch = html.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
+        bodyText = bodyMatch ? bodyMatch[1] : html;
+      } else {
+        console.warn(`⚠️ Hostinger returned status ${response.status}. Relying on manual backups.`);
       }
+    } catch (error) {
+      console.warn(`⚠️ Network fetch failed for ${url}. Relying on manual backups.`);
+    }
 
-      const html = await response.text();
+    // 🛡️ GUARANTEED INJECTION: 
+    // Whether the fetch succeeded, failed, or was blocked, we inject the backup data!
+    if (manualContentBackups[url]) {
+      console.log(`   └─ Injecting manual dictionary for ${url}`);
+      bodyText += " " + manualContentBackups[url];
+    }
 
-      // Extract Page Title
-      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-      const title = titleMatch ? titleMatch[1].trim() : url;
+    // Clean up text
+    bodyText = bodyText
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') 
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')   
+      .replace(/<[^>]+>/g, ' ')                         
+      .replace(/\s+/g, ' ')                             
+      .trim()
+      .toLowerCase();
 
-      // Extract raw body contents
-      const bodyMatch = html.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
-      let bodyText = bodyMatch ? bodyMatch[1] : html;
-
-      // 🔍 DETECT & EXTRACT Trapped Content in Hostinger iFrames
-      const srcdocRegex = /srcdoc\s*=\s*["']([\s\S]*?)["']/gi;
-      let match;
-      let extractedEmbedContents = "";
-
-      while ((match = srcdocRegex.exec(bodyText)) !== null) {
-        const rawSrcdoc = match[1];
-        const decodedSrcdoc = decodeHtmlEntities(rawSrcdoc);
-        extractedEmbedContents += " " + decodedSrcdoc;
-      }
-
-      if (extractedEmbedContents) {
-        console.log(`   └─ Found and unpacked inline iframe code block dynamically!`);
-        bodyText += " " + extractedEmbedContents;
-      } else if (manualContentBackups[url]) {
-        // 🛡️ FALLBACK TRIGGERED: If Hostinger hid the code block, inject our clean backup block
-        console.log(`   ⚠️ No inline iframe found. Injecting manual content backup for search optimization.`);
-        bodyText += " " + manualContentBackups[url];
-      }
-
-      // Clean HTML tags, scripts, and CSS styling
-      bodyText = bodyText
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') 
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')   
-        .replace(/<[^>]+>/g, ' ')                         
-        .replace(/\s+/g, ' ')                             
-        .trim()
-        .toLowerCase();
-
+    // Only save if there is actual content
+    if (bodyText.length > 0) {
       searchIndex.push({
         title: title,
         url: url,
         content: bodyText
       });
-      
       console.log(`✅ Successfully indexed: "${title}"`);
-
-    } catch (error) {
-      console.warn(`⚠️ Skipped URL: ${url} (Reason: ${error.message})`);
+    } else {
+      console.log(`❌ Skipped ${url}: No content and no backup dictionary found.`);
     }
   }
 
