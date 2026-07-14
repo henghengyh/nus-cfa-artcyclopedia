@@ -1,6 +1,5 @@
 const fs = require('fs');
 
-// The active NUS-CAC links you want to crawl
 const urls = [
   'https://nus-cac.com/',
   'https://nus-cac.com/venue',
@@ -11,6 +10,18 @@ const urls = [
   'https://nus-cac.com/about'
 ];
 
+// Helper function to decode encoded HTML entities inside srcdoc
+function decodeHtmlEntities(str) {
+  return str
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#x26;/g, '&');
+}
+
 async function buildIndex() {
   const searchIndex = [];
 
@@ -18,7 +29,6 @@ async function buildIndex() {
     try {
       console.log(`Fetching site index from: ${url}`);
       
-      // Native fetch automatically handles SSL/TLS handshakes and follows 301/302 redirects
       const response = await fetch(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -35,10 +45,28 @@ async function buildIndex() {
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
       const title = titleMatch ? titleMatch[1].trim() : url;
 
-      // Extract and clean Body Text
+      // Extract raw body contents
       const bodyMatch = html.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
       let bodyText = bodyMatch ? bodyMatch[1] : html;
-      
+
+      // 🔍 DETECT & EXTRACT Trapped Content in Hostinger iFrames
+      const srcdocRegex = /srcdoc\s*=\s*"([\s\S]*?)"/gi;
+      let match;
+      let extractedEmbedContents = "";
+
+      while ((match = srcdocRegex.exec(bodyText)) !== null) {
+        const rawSrcdoc = match[1];
+        // Decode the entities so the tag stripper can clean it properly later
+        const decodedSrcdoc = decodeHtmlEntities(rawSrcdoc);
+        extractedEmbedContents += " " + decodedSrcdoc;
+      }
+
+      if (extractedEmbedContents) {
+        console.log(`   └─ Found and unpacked inline iframe code block!`);
+        bodyText += " " + extractedEmbedContents;
+      }
+
+      // Clean HTML tags, scripts, and CSS styling
       bodyText = bodyText
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') 
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')   
@@ -60,9 +88,9 @@ async function buildIndex() {
     }
   }
 
-  // Save the compiled data
+  // Save the database
   fs.writeFileSync('search-index.json', JSON.stringify(searchIndex, null, 2));
-  console.log(`🏁 Done! Successfully wrote ${searchIndex.length} pages to search-index.json!`);
+  console.log(`🏁 Successfully wrote ${searchIndex.length} pages to search-index.json!`);
 }
 
 buildIndex();
