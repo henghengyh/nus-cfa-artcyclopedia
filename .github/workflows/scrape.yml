@@ -5,7 +5,7 @@ on:
     - cron: '0 0 * * *' 
   workflow_dispatch: 
 
-# CRITICAL FIX: Gives the GitHub Action permission to write & commit files back to your repo
+# Permissions required to let the bot save files back to your code branch
 permissions:
   contents: write
 
@@ -13,18 +13,19 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      # Fixes warning by targeting the latest action updates
       - name: Checkout Repo code
-        uses: actions/checkout@v4 
+        uses: actions/checkout@v4
 
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # Explicitly uses a modern active Node version
+          node-version: '22'
+
+      - name: Install local package dependencies
+        run: npm install
 
       - name: Run Scraper Script
-        run: |
-          node scraper.js || (echo "❌ SCRAPER CRASHED! See details above." && exit 1)
+        run: node scraper.js
 
       - name: Commit and Push Updated Index
         run: |
