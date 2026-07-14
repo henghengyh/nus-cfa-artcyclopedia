@@ -2,28 +2,34 @@ name: Daily Web Scraper Search Index
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs automatically every day at midnight
-  workflow_dispatch: # Allows you to click a button to run it manually anytime
+    - cron: '0 0 * * *' 
+  workflow_dispatch: 
+
+# CRITICAL FIX: Gives the GitHub Action permission to write & commit files back to your repo
+permissions:
+  contents: write
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
+      # Fixes warning by targeting the latest action updates
       - name: Checkout Repo code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 
 
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # Explicitly uses a modern active Node version
 
       - name: Run Scraper Script
-        run: node scraper.js
+        run: |
+          node scraper.js || (echo "❌ SCRAPER CRASHED! See details above." && exit 1)
 
-      - name: Commit and Push Updated Index to GitHub Pages
+      - name: Commit and Push Updated Index
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "actions@github.com"
           git add search-index.json
-          git commit -m "Automated update of search index database" || exit 0
+          git commit -m "Automated update of search index database" || echo "No changes to commit"
           git push
