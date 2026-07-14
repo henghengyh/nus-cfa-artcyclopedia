@@ -11,44 +11,57 @@ const urls = [
   'https://nus-cac.com/about'
 ];
 
+// Helper function to fetch HTML content securely without external fetch dependencies
+function fetchHtml(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        return reject(new Error(`Status Code: ${res.statusCode}`));
+      }
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve(data));
+    }).on('error', err => reject(err));
+  });
+}
+
 async function buildIndex() {
   const searchIndex = [];
 
   for (const url of urls) {
     try {
-      console.log(`Fetching HTML from: ${url}`);
-      const response = await fetch(url);
-      if (!response.ok) continue;
-      
-      const html = await response.text();
+      console.log(`Fetching site index from: ${url}`);
+      const html = await fetchHtml(url);
 
-      // 1. Extract the Page Title via regex
+      // Extract <title> value using simple regex matching
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
       const title = titleMatch ? titleMatch[1].trim() : url;
 
-      // 2. Extract Body Text (strips out HTML tags so we can find clean keywords)
+      // Extract content from <body> block and strip layout markup
       const bodyMatch = html.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
       let bodyText = bodyMatch ? bodyMatch[1] : html;
+      
       bodyText = bodyText
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remove scripts
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')   // Remove styles
-        .replace(/<[^>]+>/g, ' ')                         // Strip HTML tags
-        .replace(/\s+/g, ' ')                             // Clean up spacing
+        .replace(/<[^>]+>/g, ' ')                         // Strip tags
+        .replace(/\s+/g, ' ')                             // Clean multiple spaces
+        .trim()
         .toLowerCase();
 
       searchIndex.push({
         title: title,
         url: url,
-        content: bodyText // The search bar will look through this text
+        content: bodyText
       });
     } catch (error) {
-      console.error(`Failed to scrape ${url}:`, error.message);
+      console.error(`Skipping URL: ${url} due to error:`, error.message);
     }
   }
 
-  // Save the compiled data to a static JSON file
+  // Output compiled JSON static database locally
   fs.writeFileSync('search-index.json', JSON.stringify(searchIndex, null, 2));
-  console.log('Successfully built search-index.json!');
+  console.log('Successfully written index database to search-index.json!');
 }
 
 buildIndex();
