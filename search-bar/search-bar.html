@@ -4,167 +4,308 @@
       <input 
         type="text" 
         id="directSearchInput" 
-        placeholder="Type to search..." 
+        placeholder="Search pages, venues, student groups..." 
         autocomplete="off"
       >
-      <div id="dynamicDropdown" class="dynamic-menu"></div>
+      <div class="search-icon-placeholder">🔍</div>
+      <div class="search-kbd">🔎</div>
     </div>
+    <div id="dynamicDropdown" class="dynamic-menu"></div>
   </div>
 </div>
 
 <style>
   html, body, .clean-search-container { overflow: visible !important; }
-  .clean-search-container { font-family: -apple-system, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 10px; padding-bottom: 500px; }
-  .search-box-wrapper { position: relative; width: 100%; overflow: visible !important; }
-  .input-container { position: relative; overflow: visible !important; }
-  #directSearchInput { width: 100%; padding: 12px 16px; font-size: 1rem; border: 2px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; outline: none; }
-  #directSearchInput:focus { border-color: #003d7c; }
-  .dynamic-menu { display: none; position: absolute; top: 105%; left: 0; right: 0; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); z-index: 999999 !important; max-height: 350px; overflow-y: auto; }
-  .menu-section-title { padding: 8px 14px; font-size: 0.75rem; text-transform: uppercase; color: #64748b; background: #f8fafc; font-weight: bold; border-bottom: 1px solid #e2e8f0; }
   
-  /* Dropdown layouts containing titles and text snippets */
-  .dropdown-link-item { display: block; padding: 12px 14px; color: #333; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
-  .dropdown-link-item:hover { background: #f1f5f9; }
-  .dropdown-link-item:hover .item-title { color: #003d7c; }
+  .clean-search-container { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b; 
+    max-width: 650px; 
+    margin: 20px auto; 
+    padding: 10px; 
+    padding-bottom: 500px; 
+  }
   
-  .item-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 3px; color: #1e293b; }
-  .item-snippet { font-size: 0.8rem; color: #64748b; line-height: 1.3; }
+  .search-box-wrapper { 
+    position: relative; 
+    width: 100%; 
+    overflow: visible !important; 
+  }
   
-  /* Custom highlight matching color rules */
-  .search-highlight { color: #d97706; font-weight: bold; background-color: #fef3c7; padding: 0 2px; border-radius: 2px; }
+  .input-container { 
+    position: relative; 
+    overflow: visible !important;
+    display: flex;
+    align-items: center;
+  }
   
-  .no-results { padding: 14px; color: #64748b; text-align: center; font-size: 0.9rem; }
+  /* Classy Translucent Input Bar */
+  #directSearchInput { 
+    width: 100%; 
+    padding: 14px 16px 14px 44px; 
+    font-size: 1rem; 
+    color: #0f172a;
+    /* Translucent white tint */
+    background-color: rgba(255, 255, 255, 0.75);
+    /* Frosted glass blur effect */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* Ultra-fine elegant border */
+    border: 1px solid rgba(226, 232, 240, 0.8); 
+    border-radius: 14px; 
+    box-sizing: border-box; 
+    outline: none; 
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Focus State with Premium Royal Blue Shadow Ring */
+  #directSearchInput:focus { 
+    border-color: rgba(0, 61, 124, 0.5); 
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 4px rgba(0, 61, 124, 0.08), 0 10px 30px rgba(0, 0, 0, 0.05);
+  }
+  
+  .search-icon-placeholder {
+    position: absolute;
+    left: 16px;
+    font-size: 1.05rem;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  
+  .search-kbd {
+    position: absolute;
+    right: 16px;
+    font-size: 0.95rem;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  
+  /* Premium Frosted Glass Dropdown Panel */
+  .dynamic-menu { 
+    display: none; 
+    position: absolute; 
+    top: calc(100% + 10px); 
+    left: 0; 
+    right: 0; 
+    /* Translucent base */
+    background: rgba(255, 255, 255, 0.82); 
+    /* Heavy glass blur */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    /* Multi-layered sharp shadow configuration */
+    border: 1px solid rgba(255, 255, 255, 0.6); 
+    border-radius: 16px; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 
+                0 20px 40px -5px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+    z-index: 999999 !important; 
+    max-height: 380px; 
+    overflow-y: auto;
+    padding: 8px;
+  }
+  
+  /* Elegant Smaller Typography for Section Titles */
+  .menu-section-title { 
+    padding: 10px 12px 6px 12px; 
+    font-size: 0.7rem; 
+    letter-spacing: 0.08em;
+    text-transform: uppercase; 
+    color: #64748b; 
+    font-weight: 700; 
+    opacity: 0.8;
+  }
+  
+  /* Smooth Hover Rows */
+  .dropdown-link-item { 
+    display: block; 
+    padding: 11px 14px; 
+    color: #334155; 
+    cursor: pointer; 
+    border-radius: 10px;
+    margin-bottom: 3px;
+    background: transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .dropdown-link-item:hover { 
+    /* Muted premium slate hover block */
+    background: rgba(241, 245, 249, 0.7); 
+  }
+  .dropdown-link-item:hover .item-title { 
+    color: #003d7c; 
+  }
+  
+  .item-title { 
+    font-size: 0.92rem; 
+    font-weight: 600; 
+    margin-bottom: 3px; 
+    color: #0f172a; 
+  }
+  
+  .item-snippet { 
+    font-size: 0.82rem; 
+    color: #475569; 
+    line-height: 1.45; 
+  }
+  
+  /* Elegant Muted Amber Highlights */
+  .search-highlight { 
+    color: #b45309; 
+    font-weight: 600; 
+    background-color: rgba(254, 243, 199, 0.7); 
+    padding: 1px 5px; 
+    border-radius: 4px; 
+  }
+  
+  .no-results { 
+    padding: 24px 14px; 
+    color: #64748b; 
+    text-align: center; 
+    font-size: 0.9rem; 
+  }
 </style>
 
 <script>
-  const sitePersonas = [
-    { label: "🪩 I'm new to NUS Arts", keywords: ["new", "nus", "freshman", "orientation"], url: "homepage" },
-    { label: "🎬 I want to organise a production", keywords: ["production", "organise", "booking", "theatre"], url: "venue" },
-    { label: "💰 I'm handling club finances", keywords: ["finance", "claims", "grant", "budget"], url: "funding" },
-    { label: "🎭 I'm looking for performance opportunities", keywords: ["performance", "audition", "talent"], url: "student-groups" }
-  ];
+  document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById('directSearchInput');
+    const dropdown = document.getElementById('dynamicDropdown');
 
+    if (!searchInput || !dropdown) return;
 
-  const GITHUB_JSON_URL = "https://raw.githubusercontent.com/henghengyh/nus-cfa-artcyclopedia/main/search-index.json";
+    const sitePersonas = [
+      { label: "🪩 I'm new to NUS Arts", keywords: ["new", "nus", "freshman", "orientation"], url: "/" },
+      { label: "🎬 I want to organise a production", keywords: ["production", "organise", "booking", "theatre"], url: "/venue" },
+      { label: "💰 I'm handling club finances", keywords: ["finance", "claims", "grant", "budget"], url: "/funding" },
+      { label: "🎭 I'm looking for performance opportunities", keywords: ["performance", "audition", "talent"], url: "/student-groups" }
+    ];
 
-  let scrapedDatabase = [];
-  const searchInput = document.getElementById('directSearchInput');
-  const dropdown = document.getElementById('dynamicDropdown');
+    const GITHUB_JSON_URL = "https://raw.githubusercontent.com/henghengyh/nus-cfa-artcyclopedia/main/search-index.json";
+    let scrapedDatabase = [];
 
-  async function loadSearchDatabase() {
-    try {
-      const res = await fetch(GITHUB_JSON_URL);
-      if (res.ok) scrapedDatabase = await res.json();
-    } catch (e) { console.error("Database loading deferred.", e); }
-  }
-  loadSearchDatabase();
+    async function loadSearchDatabase() {
+      try {
+        const res = await fetch(GITHUB_JSON_URL);
+        if (res.ok) scrapedDatabase = await res.json();
+      } catch (e) { console.error("Database loading deferred.", e); }
+    }
+    loadSearchDatabase();
 
-  // Helper function to extract text frame surrounding the target match location
-  function getSnippet(content, query) {
-    if (!content) return "";
-    const index = content.toLowerCase().indexOf(query);
-    if (index === -1) return content.substring(0, 80) + "...";
-    
-    // Grab 40 characters before and 60 characters after the matched keyword
-    const start = Math.max(0, index - 40);
-    const end = Math.min(content.length, index + query.length + 60);
-    
-    let snippet = content.substring(start, end);
-    if (start > 0) snippet = "..." + snippet;
-    if (end < content.length) snippet = snippet + "...";
-    
-    return snippet;
-  }
-
-  // Helper function to dynamically insert HTML wrapper tags around matched text segments
-  function highlightText(text, query) {
-    if (!text) return "";
-    // Escapes regex characters to avoid code breakages
-    const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`(${escapedQuery})`, 'gi');
-    return text.replace(regex, `<span class="search-highlight">$1</span>`);
-  }
-
-  function updateDropdown(items, titleText, query = "") {
-    dropdown.innerHTML = '';
-    if (items.length === 0) {
-      dropdown.innerHTML = '<div class="no-results">No matching keywords found on site.</div>';
-      return;
+    function getSnippet(content, query) {
+      if (!content) return "";
+      const index = content.toLowerCase().indexOf(query);
+      if (index === -1) return content.substring(0, 80) + "...";
+      
+      const start = Math.max(0, index - 40);
+      const end = Math.min(content.length, index + query.length + 60);
+      
+      let snippet = content.substring(start, end);
+      if (start > 0) snippet = "..." + snippet;
+      if (end < content.length) snippet = snippet + "...";
+      
+      return snippet;
     }
 
-    const header = document.createElement('div');
-    header.className = 'menu-section-title';
-    header.textContent = titleText;
-    dropdown.appendChild(header);
+    function highlightText(text, query) {
+      if (!text) return "";
+      const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      return text.replace(regex, `<span class="search-highlight">$1</span>`);
+    }
 
-    items.forEach(item => {
-      const itemRow = document.createElement('div');
-      itemRow.className = 'dropdown-link-item';
-      
-      // Separate structural injection blocks for formatted Title and Snippet text layouts
-      const titleDiv = document.createElement('div');
-      titleDiv.className = 'item-title';
-      titleDiv.innerHTML = query ? highlightText(item.label, query) : item.label;
-      
-      itemRow.appendChild(titleDiv);
-
-      if (item.snippet) {
-        const snippetDiv = document.createElement('div');
-        snippetDiv.className = 'item-snippet';
-        snippetDiv.innerHTML = highlightText(item.snippet, query);
-        itemRow.appendChild(snippetDiv);
+    function updateDropdown(items, titleText, query = "") {
+      dropdown.innerHTML = '';
+      if (items.length === 0) {
+        dropdown.innerHTML = '<div class="no-results">No matching keywords found on site.</div>';
+        return;
       }
 
-      itemRow.onclick = function() {
-        window.top ? window.top.location.href = item.url : window.location.href = item.url;
-      };
-      dropdown.appendChild(itemRow);
+      const header = document.createElement('div');
+      header.className = 'menu-section-title';
+      header.textContent = titleText;
+      dropdown.appendChild(header);
+
+      items.forEach(item => {
+        const itemRow = document.createElement('div');
+        itemRow.className = 'dropdown-link-item';
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'item-title';
+        titleDiv.innerHTML = query ? highlightText(item.label, query) : item.label;
+        itemRow.appendChild(titleDiv);
+
+        if (item.snippet) {
+          const snippetDiv = document.createElement('div');
+          snippetDiv.className = 'item-snippet';
+          snippetDiv.innerHTML = highlightText(item.snippet, query);
+          itemRow.appendChild(snippetDiv);
+        }
+
+        itemRow.onclick = function() {
+          let targetUrl = item.url;
+          
+          if (targetUrl.startsWith('/')) {
+            targetUrl = 'https://nus-cac.com' + targetUrl;
+          } else if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+            targetUrl = 'https://nus-cac.com/' + targetUrl;
+          }
+
+          try {
+            if (window.top && window.top.location) {
+              window.top.location.href = targetUrl;
+            } else {
+              window.location.href = targetUrl;
+            }
+          } catch(err) {
+            window.location.href = targetUrl;
+          }
+        };
+        dropdown.appendChild(itemRow);
+      });
+    }
+
+    searchInput.addEventListener('focus', () => {
+      if (!searchInput.value.trim()) {
+        updateDropdown(sitePersonas, "Select Your Profile / Need");
+      }
+      dropdown.style.display = 'block';
     });
-  }
 
-  searchInput.addEventListener('focus', () => {
-    if (!searchInput.value.trim()) {
-      updateDropdown(sitePersonas, "Select Your Profile / Need");
-    }
-    dropdown.style.display = 'block';
-  });
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      if (!query) {
+        updateDropdown(sitePersonas, "Select Your Profile / Need");
+        return;
+      }
 
-  searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
-    if (!query) {
-      updateDropdown(sitePersonas, "Select Your Profile / Need");
-      return;
-    }
+      let matches = sitePersonas.filter(item => 
+        item.label.toLowerCase().includes(query) || item.keywords.some(k => k.includes(query))
+      );
 
-    // A. Check hardcoded user profile mappings first
-    let matches = sitePersonas.filter(item => 
-      item.label.toLowerCase().includes(query) || item.keywords.some(k => k.includes(query))
-    );
+      if (matches.length === 0 && scrapedDatabase.length > 0) {
+        matches = scrapedDatabase
+          .filter(page => {
+            const contentText = page.content ? page.content.toLowerCase() : "";
+            const titleText = page.title ? page.title.toLowerCase() : "";
+            return contentText.includes(query) || titleText.includes(query);
+          })
+          .map(page => {
+            const contentStr = page.content || "";
+            const rawSnippet = getSnippet(contentStr, query);
+            return { 
+              label: `📄 ${page.title}`, 
+              url: page.url,
+              snippet: rawSnippet
+            };
+          });
+      }
 
-    // B. Deep check inside database page index models
-    if (matches.length === 0 && scrapedDatabase.length > 0) {
-      matches = scrapedDatabase
-        .filter(page => {
-          const contentText = page.content ? page.content.toLowerCase() : "";
-          const titleText = page.title ? page.title.toLowerCase() : "";
-          return contentText.includes(query) || titleText.includes(query);
-        })
-        .map(page => {
-          const contentStr = page.content || "";
-          // Generate context snippet string
-          const rawSnippet = getSnippet(contentStr, query);
-          return { 
-            label: `📄 ${page.title}`, 
-            url: page.url,
-            snippet: rawSnippet
-          };
-        });
-    }
+      updateDropdown(matches, "Search Results", query);
+    });
 
-    updateDropdown(matches, "Search Results", query);
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-box-wrapper')) dropdown.style.display = 'none';
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-box-wrapper')) dropdown.style.display = 'none';
+    });
   });
 </script>
