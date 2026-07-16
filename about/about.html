@@ -1,0 +1,272 @@
+<!-- Google Fonts import to force Poppins -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="events-section-container">
+  
+  <!-- Carousel Header & Controls -->
+  <div class="carousel-header">
+    <div class="header-text">
+      <span class="sub-badge">Stay Connected</span>
+      <h2>Our Signature Events</h2>
+    </div>
+    <div class="carousel-nav-arrows">
+      <button class="nav-arrow prev-btn" id="prevEventBtn" aria-label="Previous Slide">‹</button>
+      <button class="nav-arrow next-btn" id="nextEventBtn" aria-label="Next Slide">›</button>
+    </div>
+  </div>
+
+  <!-- Scrollable Carousel Viewport -->
+  <div class="events-carousel-viewport" id="eventsCarousel">
+    <!-- Events will be dynamically injected here via JSON in JavaScript -->
+  </div>
+
+</div>
+
+<!-- ==========================================
+     STYLING (CSS) - Matching Your Theme
+     ========================================== -->
+<style>
+  :root {
+    --primary-blue: #003d7c;
+    --text-dark: #0f172a;
+    --text-muted: #475569;
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --card-border: rgba(148, 163, 184, 0.15);
+  }
+
+  .events-section-container {
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif !important;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+
+  /* Carousel Header Layout */
+  .carousel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+  }
+
+  .sub-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary-blue);
+    margin-bottom: 4px;
+  }
+
+  .carousel-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+  }
+
+  /* Navigation Arrows */
+  .carousel-nav-arrows {
+    display: flex;
+    gap: 10px;
+  }
+
+  .nav-arrow {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-dark);
+    font-size: 1.5rem;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s ease;
+    user-select: none;
+    line-height: 0;
+    padding-bottom: 4px; /* Perfectly center the arrow glyphs */
+  }
+
+  .nav-arrow:hover {
+    background: var(--primary-blue);
+    color: #ffffff;
+    border-color: var(--primary-blue);
+    transform: translateY(-2px);
+  }
+
+  /* Smooth-Scroll Viewport */
+  .events-carousel-viewport {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 10px 5px 25px 5px; /* Added bottom padding to safeguard card shadow clipping */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .events-carousel-viewport::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Glassmorphic Event Card */
+  .event-card {
+    flex: 0 0 300px; /* Force card width */
+    background: #ffffff;
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    border-color: rgba(148, 163, 184, 0.3);
+  }
+
+  /* Aspect-ratio locked image crop container */
+  .event-image-wrapper {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: #f1f5f9;
+    position: relative;
+  }
+
+  .event-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .event-card:hover .event-image-wrapper img {
+    transform: scale(1.06);
+  }
+
+  /* Card Inner Content */
+  .event-details {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+  }
+
+  .event-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+  }
+
+  /* Premium Instagram Gradient Button */
+  .ig-button {
+    display: block;
+    text-align: center;
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, #f43f5e, #db2777); /* Beautiful IG Sunset Pink */
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.2);
+    transition: all 0.25s ease;
+  }
+
+  .ig-button:hover {
+    opacity: 0.95;
+    transform: scale(1.02);
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.35);
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 600px) {
+    .event-card {
+      flex: 0 0 260px; /* Slightly narrower cards on small mobile screens */
+    }
+    .carousel-header h2 {
+      font-size: 1.4rem;
+    }
+  }
+</style>
+
+<!-- ==========================================
+     LOGIC (JavaScript) - Data Injection & Scroll
+     ========================================== -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. JSON Array containing all active CAC Events
+        const eventsData = [
+      { "title": "CAC Run & Bond", "photo": "run-and-bond.jpg", "url": "https://www.instagram.com/nuscac/" },
+      { "title": "CAC Welcome Tea", "photo": "welcome-tea.jpg", "url": "https://www.instagram.com/nuscac/" },
+      { "title": "Arts Buzz", "photo": "arts-buzz.jpg", "url": "https://www.instagram.com/nuscac/" },
+      { "title": "CAC Transition Night", "photo": "transition-night.jpg", "url": "https://www.instagram.com/nuscac/" }
+    ];
+
+    // Base path constructed to pull raw images from GitHub Repository
+    const baseImgUrl = "https://raw.githubusercontent.com/henghengyh/nus-cfa-artcyclopedia/main/photos/about/";
+    
+    const carousel = document.getElementById("eventsCarousel");
+    const prevBtn = document.getElementById("prevEventBtn");
+    const nextBtn = document.getElementById("nextEventBtn");
+
+    if (!carousel) return;
+
+    // 2. Render cards onto the DOM
+    function renderCarousel() {
+      carousel.innerHTML = eventsData.map(event => {
+        // Safe fallbacks for data attributes
+        const title = event.title || "CAC Event";
+        const imagePath = `${baseImgUrl}${event.photo}`;
+        const destinationLink = event.url || "https://www.instagram.com/nuscac/";
+
+        return `
+          <div class="event-card">
+            <div class="event-image-wrapper">
+              <img src="${imagePath}" alt="${title}" loading="lazy">
+            </div>
+            <div class="event-details">
+              <h4 class="event-title">${title}</h4>
+              <a href="${destinationLink}" class="ig-button" target="_blank">Find Out More 📸</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 3. Setup Arrow Button Scrolling Interaction
+    function setupNavigation() {
+      const scrollOffset = 324; // Width of card (300px) + gap (24px)
+
+      nextBtn.addEventListener("click", () => {
+        carousel.scrollBy({ left: scrollOffset, behavior: "smooth" });
+      });
+
+      prevBtn.addEventListener("click", () => {
+        carousel.scrollBy({ left: -scrollOffset, behavior: "smooth" });
+      });
+    }
+
+    // Initialize Card Elements
+    renderCarousel();
+    setupNavigation();
+  });
+</script>
