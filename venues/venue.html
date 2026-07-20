@@ -1,0 +1,288 @@
+<!-- 1. INJECTED DATA PLACEHOLDER -->
+<script>
+        const venuesData = [
+      { cluster: "Yusof Ishak House (YIH)", subcategory: "Multipurpose Rooms", venues: ["Ascent", "Beacon", "Elevate", "Illuminate", "Lumina", "Pinnacle", "Quest", "Wisdom"] },
+      { cluster: "Yusof Ishak House (YIH)", subcategory: "Other Spaces", venues: ["Multipurpose Areas", "Flow", "Motion", "StepUp", "Harmony", "Rhythm", "Jamming Studio"] },
+      { cluster: "University Cultural Centre (UCC)", subcategory: "", venues: ["Ho Bee Auditorium", "Theatre", "Dance Studio", "Function Rooms", "Atrium", "Theatre Foyer", "Ho Bee Auditorium Foyer"] },
+      { cluster: "University Town (UTown)", subcategory: "Performance", venues: ["Auditorium", "Green"] },
+      { cluster: "University Town (UTown)", subcategory: "Dance", venues: ["Dance Studio", "Dance Atelier", "Dance Atelier 2"] },
+      { cluster: "University Town (UTown)", subcategory: "Music & Practice", venues: ["Music Studio", "Practice Room 1", "Practice Room L1", "Practice Room L3", "Practice Room M1", "Practice Room M2", "Practice Room M3", "Practice Room M4", "Practice Room M5", "Studio M1", "Studio M2", "Studio M3", "Studio M4", "Studio M5", "Studio M6"] },
+      { cluster: "University Town (UTown)", subcategory: "Other", venues: ["Sports Hall (MPSH)", "Seminar Rooms"] },
+      { cluster: "Libraries", subcategory: "Central Library", venues: ["Level 1 Event Space", "Level 4 Event Spaces"] },
+      { cluster: "Libraries", subcategory: "Medical Science Library", venues: ["Collaboration Space L1", "Collaboration Space L2"] },
+      { cluster: "Libraries", subcategory: "Wan Boo Sow Chinese Library", venues: ["Corridor Section 1", "Corridor Section 2", "Level 6 Event Space"] },
+      { cluster: "Libraries", subcategory: "Law Library", venues: ["Gallery Space (L2)"] },
+      { cluster: "University Hall (UHall)", subcategory: "", venues: ["Corridor Section 1", "Corridor Section 2"] },
+      { cluster: "School of Computing (SoC)", subcategory: "", venues: ["COM3 Foyer"] },
+      { cluster: "Yong Siew Toh Conservatory (YST)", subcategory: "", venues: ["Conservatory Concert Hall"] },
+      { cluster: "Other Venues", subcategory: "Shaw Foundation Alumni House", venues: ["Auditorium"] },
+      { cluster: "Other Venues", subcategory: "Yale-NUS College", venues: ["College Hall"] },
+      { cluster: "Other Venues", subcategory: "Ngee Ann Kongsi", venues: ["Auditorium"] },
+      { cluster: "Faculty Spaces", subcategory: "Science", venues: ["Lecture Theatres", "Seminar Rooms", "Foyers"] },
+      { cluster: "Faculty Spaces", subcategory: "FASS", venues: ["Lecture Theatres", "Seminar Rooms"] },
+      { cluster: "Faculty Spaces", subcategory: "Business", venues: ["Lecture Theatres", "Seminar Rooms"] },
+      { cluster: "Faculty Spaces", subcategory: "CDE", venues: ["Lecture Theatres", "Seminar Rooms"] },
+      { cluster: "Faculty Spaces", subcategory: "General Teaching Facilities", venues: ["Lecture Theatres", "Seminar Rooms", "Tutorial Rooms", "Foyers"] }
+    ];
+</script>
+
+<!-- 2. RENDER ENGINE -->
+<script>
+    function renderVenues() {
+        const clusters = {};
+        venuesData.forEach(item => {
+            if (!clusters[item.cluster]) {
+                clusters[item.cluster] = [];
+            }
+            clusters[item.cluster].push(item);
+        });
+
+        const container = document.getElementById('venue-list-container');
+        if (!container) return;
+        
+        container.innerHTML = "";
+
+        let isFirst = true;
+        
+        for (const [clusterName, items] of Object.entries(clusters)) {
+            const details = document.createElement('details');
+            if (isFirst) {
+                details.setAttribute('open', '');
+                isFirst = false;
+            }
+
+            const summary = document.createElement('summary');
+            summary.innerHTML = `<span>${clusterName}</span><span class="icon"></span>`;
+            
+            // Intercept click to manage smooth grid accordion collapse
+            summary.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (details.hasAttribute('open')) {
+                    // If already closing, ignore extra fast clicks
+                    if (details.classList.contains('closing')) return;
+
+                    details.classList.add('closing');
+                    
+                    // Wait for grid animation (0.4s) to finish before removing 'open' attribute
+                    setTimeout(() => {
+                        details.removeAttribute('open');
+                        details.classList.remove('closing');
+                    }, 380);
+                } else {
+                    details.setAttribute('open', '');
+                }
+            });
+
+            details.appendChild(summary);
+
+            // Accordion wrapper enabling grid row expansion
+            const accordionWrapper = document.createElement('div');
+            accordionWrapper.className = 'accordion-wrapper';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'content';
+
+            items.forEach(item => {
+                if (item.subcategory) {
+                    const secTitle = document.createElement('div');
+                    secTitle.className = 'section-title';
+                    secTitle.textContent = item.subcategory;
+                    contentDiv.appendChild(secTitle);
+                }
+
+                const tagsDiv = document.createElement('div');
+                tagsDiv.className = 'tags';
+
+                item.venues.forEach(venue => {
+                    const span = document.createElement('span');
+                    span.className = 'tag';
+                    span.textContent = venue;
+                    tagsDiv.appendChild(span);
+                });
+
+                contentDiv.appendChild(tagsDiv);
+            });
+
+            accordionWrapper.appendChild(contentDiv);
+            details.appendChild(accordionWrapper);
+            container.appendChild(details);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", renderVenues);
+</script>
+
+<!-- 3. GLASSMORPHISM & ANIMATION STYLES -->
+<style>
+.venue-container {
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Glassmorphism Accordion Card */
+details {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease;
+    overflow: hidden;
+}
+
+details:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Summary / Header Bar */
+summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 20px 26px;
+    font-size: 19px;
+    font-weight: 600;
+    color: #1d1d1f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    background: rgba(255, 255, 255, 0.2);
+    transition: background 0.2s ease;
+}
+
+summary::-webkit-details-marker {
+    display: none;
+}
+
+summary:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Custom animated expand (+/-) indicator */
+summary .icon {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
+summary .icon::before,
+summary .icon::after {
+    content: '';
+    position: absolute;
+    background-color: #1d1d1f;
+    border-radius: 2px;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+summary .icon::before {
+    top: 7px;
+    left: 0;
+    width: 16px;
+    height: 2px;
+}
+
+summary .icon::after {
+    top: 0;
+    left: 7px;
+    width: 2px;
+    height: 16px;
+}
+
+details[open] summary .icon::after {
+    transform: rotate(90deg);
+}
+
+details[open] summary .icon::before {
+    transform: rotate(180deg);
+}
+
+/* Smooth Accordion Grid Mechanics */
+.accordion-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+details[open] .accordion-wrapper {
+    grid-template-rows: 1fr;
+}
+
+details.closing .accordion-wrapper {
+    grid-template-rows: 0fr;
+}
+
+.content {
+    overflow: hidden;
+    padding: 0 26px;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.35s ease, transform 0.35s ease, padding 0.4s ease;
+}
+
+details[open] .content {
+    opacity: 1;
+    transform: translateY(0);
+    padding: 10px 26px 26px 26px;
+}
+
+details.closing .content {
+    opacity: 0;
+    transform: translateY(-8px);
+    padding: 0 26px;
+}
+
+/* Subcategories & Tags */
+.section-title {
+    margin-top: 18px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6e6e73;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Glass Pill Tags */
+.tag {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2d2d2e;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tag:hover {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(255, 255, 255, 1);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+</style>
+
+<!-- 4. MOUNT POINT -->
+<div class="venue-container">
+    <div id="venue-list-container">
+        <!-- Dynamic glass accordions render here -->
+    </div>
+</div>
