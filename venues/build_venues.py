@@ -2,7 +2,7 @@
 """
 build_venues.py
 ---------------
-1. Reads a CSV file (columns: cluster, subcategory, venues).
+1. Reads an unrolled CSV file (flexible header matching for venue details).
 2. Converts it into a structured JS array-of-objects literal (e.g. venuesData).
 3. Finds the existing `const venuesData = [ ... ];` block inside your HTML template
    and injects the new data.
@@ -20,30 +20,84 @@ def js_string_literal(value: str) -> str:
     return json.dumps(str(value or ""), ensure_ascii=False)
 
 
+def parse_capacity(raw_cap: str) -> int:
+    """Extracts the first or highest integer found in a capacity string (e.g., '1607 - 1710 pax' -> 1710)."""
+    if not raw_cap:
+        return 0
+    numbers = [int(n) for n in re.findall(r"\d+", str(raw_cap))]
+    return max(numbers) if numbers else 0
+
+
 def read_csv_rows(csv_path: str):
     with open(csv_path, newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         if not reader.fieldnames:
             raise ValueError("CSV file has no header row detected.")
-        return [row for row in reader]
+        
+        # Normalize header keys to lowercase stripped strings for easy lookup
+        normalized_rows = []
+        for row in reader:
+            norm_row = {k.strip().lower(): (v or "").strip() for k, v in row.items() if k}
+            normalized_rows.append(norm_row)
+        return normalized_rows
 
 
 def build_js_block(rows, var_name):
     lines = [f"    const {var_name} = ["]
     for i, row in enumerate(rows):
-        cluster = row.get("cluster", "").strip()
-        subcategory = row.get("subcategory", "").strip()
+        cluster = row.get("cluster", "")
+        subcategory = row.get("subcategory", "")
         
-        # Split individual venues on double-semicolons and strip whitespaces
-        venues_raw = row.get("venues", "").split(";;")
-        venues_list = [v.strip() for v in venues_raw if v.strip()]
-        venues_js_array = json.dumps(venues_list, ensure_ascii=False)
+        # Handle header variations for venue name
+        venue_name = row.get("name") or row.get("venue name") or row.get("venue_name") or ""
+        
+        # Parse capacity flexibly
+        raw_cap = row.get("capacity", "")
+        capacity = parse_capacity(raw_cap)
+
+        # Parse facilities array
+        raw_fac = row.get("facilities", "")
+        if raw_fac:
+            delimiter = ";;" if ";;" in raw_fac else ";"
+            facilities_list = [f.strip() for f in raw_fac.split(delimiter) if f.strip()]
+        else:
+            facilities_list = []
+        
+        # Extract additional fields if coming from consolidated master CSV format
+        platform = row.get("booking platform / route") or row.get("booking platform") or ""
+        hours = row.get("bookable / operating hours") or row.get("bookable hours") or ""
+        cancel_period = row.get("cancellation period") or ""
+        instructions = row.get("booking instructions & notes") or row.get("notes") or ""
+        
+        # Build composite remarks if dedicated detailed columns are provided
+        raw_remarks = row.get("remarks", "")
+        if not raw_remarks and (platform or hours or instructions):
+            remark_parts = []
+            if hours:
+                remark_parts.append(f"Hours: {hours}")
+            if platform:
+                remark_parts.append(f"Platform: {platform}")
+            if cancel_period:
+                remark_parts.append(f"Cancel: {cancel_period}")
+            if instructions:
+                remark_parts.append(instructions)
+            remarks = " | ".join(remark_parts)
+        else:
+            remarks = raw_remarks
+
+        image_path = row.get("image", "")
+
+        facilities_js_array = json.dumps(facilities_list, ensure_ascii=False)
 
         item_str = (
             f'      {{ '
             f'cluster: {js_string_literal(cluster)}, '
             f'subcategory: {js_string_literal(subcategory)}, '
-            f'venues: {venues_js_array} '
+            f'name: {js_string_literal(venue_name)}, '
+            f'capacity: {capacity}, '
+            f'facilities: {facilities_js_array}, '
+            f'image: {js_string_literal(image_path)}, '
+            f'remarks: {js_string_literal(remarks)} '
             f'}}'
         )
         comma = "," if i < len(rows) - 1 else ""
@@ -64,7 +118,7 @@ def inject_into_html(html_text, js_block, var_name):
         insertion_point = html_text.find("</script>")
         if insertion_point == -1:
             script_wrapped = f"<script>\n  {js_block}\n</script>\n"
-            if "</body>" in html_text:
+            if "body" in html_text:
                 new_html = html_text.replace("</body>", script_wrapped + "</body>")
             else:
                 new_html = html_text + "\n" + script_wrapped
@@ -97,7 +151,7 @@ def main():
     with open(args.output_html, "w", encoding="utf-8") as f:
         f.write(new_html)
 
-    print(f"✅ Successfully compiled {len(rows)} clusters from '{args.input_csv}' into '{args.output_html}' "
+    print(f"✅ Successfully compiled {len(rows)} venues from '{args.input_csv}' into '{args.output_html}' "
           f"(variable: {args.var}).")
 
 
