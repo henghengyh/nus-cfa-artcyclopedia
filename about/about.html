@@ -233,7 +233,7 @@
       carousel.innerHTML = eventsData.map(event => {
         // Safe fallbacks for data attributes
         const title = event.title || "CAC Event";
-        const imagePath = `${baseImgUrl}${event.photo}`;
+        const imagePath = `${baseImgUrl}${event.photo.trim()}`;
         const destinationLink = event.url || "https://www.instagram.com/nuscac/";
 
         return `
