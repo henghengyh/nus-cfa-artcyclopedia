@@ -4,14 +4,16 @@ build_venues.py
 ---------------
 1. Reads an unrolled CSV file (flexible header matching for venue details).
 2. Converts it into a structured JS array-of-objects literal (e.g. venuesData).
-3. Finds the existing `const venuesData = [ ... ];` block inside your HTML template
+3. Resolves photo paths to point to relative directory (../photos/venues/).
+4. Finds the existing `const venuesData = [ ... ];` block inside your HTML template
    and injects the new data.
-4. Writes the result to the output HTML file.
+5. Writes the result to the output HTML file.
 """
 
 import argparse
 import csv
 import json
+import os
 import re
 import sys
 
@@ -21,11 +23,24 @@ def js_string_literal(value: str) -> str:
 
 
 def parse_capacity(raw_cap: str) -> int:
-    """Extracts the first or highest integer found in a capacity string (e.g., '1607 - 1710 pax' -> 1710)."""
+    """Extracts the highest integer found in a capacity string (e.g., '1607 - 1710 pax' -> 1710)."""
     if not raw_cap:
         return 0
     numbers = [int(n) for n in re.findall(r"\d+", str(raw_cap))]
     return max(numbers) if numbers else 0
+
+
+def format_image_path(raw_img: str) -> str:
+    """Formats image filename to point to sibling photos/venues directory relative to venues/."""
+    if not raw_img:
+        return ""
+    
+    # If path already contains relative or absolute routing, leave it as is
+    if "/" in raw_img or "\\" in raw_img:
+        return raw_img.replace("\\", "/")
+    
+    # Prepend relative folder path for clean folder separation
+    return f"../photos/venues/{raw_img}"
 
 
 def read_csv_rows(csv_path: str):
@@ -34,7 +49,6 @@ def read_csv_rows(csv_path: str):
         if not reader.fieldnames:
             raise ValueError("CSV file has no header row detected.")
         
-        # Normalize header keys to lowercase stripped strings for easy lookup
         normalized_rows = []
         for row in reader:
             norm_row = {k.strip().lower(): (v or "").strip() for k, v in row.items() if k}
@@ -46,7 +60,7 @@ def build_js_block(rows, var_name):
     lines = [f"    const {var_name} = ["]
     for i, row in enumerate(rows):
         cluster = row.get("cluster", "")
-        subcategory = row.get("subcategory", "")
+        subcategory = row.get("subcategory") or row.get("sub-category") or row.get("sub category") or ""
         
         # Handle header variations for venue name
         venue_name = row.get("name") or row.get("venue name") or row.get("venue_name") or ""
@@ -63,13 +77,13 @@ def build_js_block(rows, var_name):
         else:
             facilities_list = []
         
-        # Extract additional fields if coming from consolidated master CSV format
+        # Extract additional fields
         platform = row.get("booking platform / route") or row.get("booking platform") or ""
         hours = row.get("bookable / operating hours") or row.get("bookable hours") or ""
         cancel_period = row.get("cancellation period") or ""
         instructions = row.get("booking instructions & notes") or row.get("notes") or ""
         
-        # Build composite remarks if dedicated detailed columns are provided
+        # Build composite remarks
         raw_remarks = row.get("remarks", "")
         if not raw_remarks and (platform or hours or instructions):
             remark_parts = []
@@ -85,7 +99,9 @@ def build_js_block(rows, var_name):
         else:
             remarks = raw_remarks
 
-        image_path = row.get("image", "")
+        # Process image path
+        raw_image = row.get("image") or row.get("photo") or row.get("image_path") or ""
+        image_path = format_image_path(raw_image)
 
         facilities_js_array = json.dumps(facilities_list, ensure_ascii=False)
 
