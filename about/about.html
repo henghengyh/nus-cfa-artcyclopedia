@@ -214,12 +214,12 @@
   document.addEventListener("DOMContentLoaded", () => {
     
     // 1. JSON Array containing all active CAC Events
-                                                const eventsData = [
-      { "title": "Overdrive", "photo": " overdrive.jpg", "url": " https://www.instagram.com/overdrive_nuscac/" },
-      { "title": "Creator's Grant", "photo": "creators-grant.png", "url": "https://forms.cloud.microsoft/r/c32QSQ6Wy6" },
-      { "title": "Workshops", "photo": "workshops.png", "url": "https://forms.cloud.microsoft/r/gZjXPz424T" },
-      { "title": "Supernova", "photo": " supernova.jpg", "url": "https://www.instagram.com/nussupernova/?hl=en" },
-      { "title": "NUS Events", "photo": "nus-events.jpg", "url": "https://osa.nus.edu.sg/?s=arts&post_type=event" }
+                                                        const eventsData = [
+      { "title": "Overdrive", "photo": " overdrive.jpg", "url": " https://www.instagram.com/overdrive_nuscac/", "button": "Find Out More" },
+      { "title": "Creator's Grant", "photo": "creators-grant.png", "url": "https://forms.cloud.microsoft/r/c32QSQ6Wy6", "button": "Apply Now" },
+      { "title": "Workshops", "photo": "workshops.png", "url": "https://forms.cloud.microsoft/r/gZjXPz424T", "button": "Apply Now" },
+      { "title": "Supernova", "photo": " supernova.jpg", "url": "https://www.instagram.com/nussupernova/?hl=en", "button": "Find Out More" },
+      { "title": "NUS Events", "photo": "nus-events.jpg", "url": "https://osa.nus.edu.sg/?s=arts&post_type=event", "button": "Find Out More" }
     ];
 
     // Base path constructed to pull raw images from GitHub Repository
@@ -246,7 +246,7 @@
             </div>
             <div class="event-details">
               <h4 class="event-title">${title}</h4>
-              <a href="${destinationLink}" class="ig-button" target="_blank">Find Out More</a>
+              <a href="${destinationLink}" class="ig-button" target="_blank">${event.button || "Find Out More"}</a>
             </div>
           </div>
         `;
@@ -255,14 +255,20 @@
 
     // 3. Setup Arrow Button Scrolling Interaction
     function setupNavigation() {
-      const scrollOffset = 324; // Width of card (300px) + gap (24px)
+      function getScrollOffset() {
+        const firstCard = carousel.querySelector(".event-card");
+        if (!firstCard) return 0;
+
+        const gap = parseFloat(window.getComputedStyle(carousel).columnGap) || 0;
+        return firstCard.getBoundingClientRect().width + gap;
+      }
 
       nextBtn.addEventListener("click", () => {
-        carousel.scrollBy({ left: scrollOffset, behavior: "smooth" });
+        carousel.scrollBy({ left: getScrollOffset(), behavior: "smooth" });
       });
 
       prevBtn.addEventListener("click", () => {
-        carousel.scrollBy({ left: -scrollOffset, behavior: "smooth" });
+        carousel.scrollBy({ left: -getScrollOffset(), behavior: "smooth" });
       });
     }
 
